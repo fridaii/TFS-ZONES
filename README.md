@@ -1,18 +1,13 @@
-forgottenserver [![Build Status](https://github.com/otland/forgottenserver/actions/workflows/build-vcpkg.yml/badge.svg?branch=master)](https://github.com/otland/forgottenserver/actions/workflows/build-vcpkg.yml "vcpkg build status") [![Build Status](https://github.com/otland/forgottenserver/actions/workflows/docker-image.yml/badge.svg?branch=master)](https://github.com/otland/forgottenserver/actions/workflows/docker-image.yml "Docker image build status")
-===============
+This is copy of Tfs 1.4.2 with ZoneId system added.
 
-The Forgotten Server is a free and open-source MMORPG server emulator written in C++. It is a fork of the [OpenTibia Server](https://github.com/opentibia/server) project. To connect to the server, you can use [OTClient](https://github.com/edubart/otclient).
+It is an enhanced version of Oskar's zoneid system that can be found here: https://github.com/Oskar1121/RME/pull/3/files
 
-### Getting Started
+It has:
+-multiple lua functions added
+-revscript support
+-reworked stepin event to proc multiple move events on a single step
+-reworked stepin function to also give info on what zoneid procced the function
+-it was tested on my own server, hopefully i didn't forget to copy paste something
+-Oen comments on what i fucked up soon.. ;3
 
-* [Compiling](https://github.com/otland/forgottenserver/wiki/Compiling), alternatively download [releases](https://github.com/otland/forgottenserver/releases)
-* [Scripting Reference](https://github.com/otland/forgottenserver/wiki/Script-Interface)
-* [Contributing](https://github.com/otland/forgottenserver/wiki/Contributing)
-
-### Support
-
-If you need help, please visit the [support forum on OTLand](https://otland.net/forums/support.16/). Our issue tracker is not a support forum, and using it as one will result in your issue being closed. If you were unable to get assistance in the support forum, you should consider [becoming a premium user on OTLand](https://otland.net/account/upgrades) which grants you access to the premium support forum and supports OTLand financially.
-
-### Issues
-
-We use the [issue tracker on GitHub](https://github.com/otland/forgottenserver/issues). Keep in mind that everyone who is watching the repository gets notified by e-mail when there is activity, so be thoughtful and avoid writing comments that aren't meaningful for an issue (e.g. "+1"). If you'd like for an issue to be fixed faster, you should either fix it yourself and submit a pull request, or place a bounty on the issue.
+join Discord for more resources: https://discord.gg/UuG4WuCZ9b
