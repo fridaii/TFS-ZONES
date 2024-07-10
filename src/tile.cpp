@@ -1601,3 +1601,19 @@ Item* Tile::getUseItem(int32_t index) const
 
 	return nullptr;
 }
+
+void Tile::setTrueZoneId(uint16_t zoneId)
+{
+	m_zoneIds.push_back(zoneId); //allows for adding zones from lua, originally adding was possible only via loading from map editor
+}
+
+bool Tile::hasZoneId(uint16_t zoneId) const
+{
+	return std::find(m_zoneIds.begin(), m_zoneIds.end(), zoneId) != m_zoneIds.end();
+}
+
+void Tile::setZoneId(const std::vector<uint16_t>& zoneIds)
+{
+	m_zoneIds = std::move(zoneIds); //ping oen44
+	g_game.addGameZone(getTile(), m_zoneIds);
+}

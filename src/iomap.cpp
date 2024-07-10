@@ -236,6 +236,7 @@ bool IOMap::parseTileArea(OTB::Loader& loader, const OTB::Node& tileAreaNode, Ma
 		House* house = nullptr;
 		Tile* tile = nullptr;
 		Item* ground_item = nullptr;
+		std::vector<uint16_t> zoneIds;
 		uint32_t tileflags = TILESTATE_NONE;
 
 		if (tileNode.type == OTBM_HOUSETILE) {
@@ -277,6 +278,20 @@ bool IOMap::parseTileArea(OTB::Loader& loader, const OTB::Node& tileAreaNode, Ma
 
 					if ((flags & OTBM_TILEFLAG_NOLOGOUT) != 0) {
 						tileflags |= TILESTATE_NOLOGOUT;
+					}
+
+					if ((flags & OTBM_TILEFLAG_ZONE) != 0) {
+						uint16_t zoneId = 0;
+						do {
+							if (!propStream.read<uint16_t>(zoneId)) {
+								setLastErrorString("[x:" + std::to_string(x) + ", y:" + std::to_string(y) + ", z:" + std::to_string(z) + "] Failed to read zone id.");
+								return false;
+							}
+
+							if (zoneId != 0) {
+								zoneIds.push_back(zoneId);
+							}
+						} while (zoneId != 0);
 					}
 					break;
 				}
@@ -372,6 +387,9 @@ bool IOMap::parseTileArea(OTB::Loader& loader, const OTB::Node& tileAreaNode, Ma
 		}
 
 		tile->setFlag(static_cast<tileflags_t>(tileflags));
+		if (!zoneIds.empty()) {
+			tile->setZoneId(zoneIds);
+		}
 
 		map.setTile(x, y, z, tile);
 	}

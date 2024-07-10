@@ -266,6 +266,11 @@ class Tile : public Cylinder
 			ground = item;
 		}
 
+		void setZoneId(const std::vector<uint16_t>&);
+		void setTrueZoneId(uint16_t zoneId);
+		const std::vector<uint16_t>& getZoneIds() const { return m_zoneIds; }
+		bool hasZoneId(uint16_t) const;
+
 	private:
 		void onAddTileItem(Item* item);
 		void onUpdateTileItem(Item* oldItem, const ItemType& oldType, Item* newItem, const ItemType& newType);
@@ -278,6 +283,7 @@ class Tile : public Cylinder
 		Item* ground = nullptr;
 		Position tilePos;
 		uint32_t flags = 0;
+		std::vector<uint16_t> m_zoneIds;
 };
 
 // Used for walkable tiles, where there is high likeliness of

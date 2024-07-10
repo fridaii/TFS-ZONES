@@ -26,6 +26,7 @@
 #include "globalevent.h"
 #include "script.h"
 #include "weapons.h"
+#include "zones.h"
 
 extern Chat* g_chat;
 extern Game g_game;
@@ -2050,6 +2051,23 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Game", "setAccountStorageValue", LuaScriptInterface::luaGameSetAccountStorageValue);
 	registerMethod("Game", "saveAccountStorageValues", LuaScriptInterface::luaGameSaveAccountStorageValues);
 
+	// Zone System Counts
+	registerMethod("Game", "getZoneCreatureCount", LuaScriptInterface::luaGameZoneGetCreatureCount);
+	registerMethod("Game", "getZonePlayerCount", LuaScriptInterface::luaGameZoneGetPlayerCount);
+	registerMethod("Game", "getZoneNpcCount", LuaScriptInterface::luaGameZoneGetNpcCount);
+	registerMethod("Game", "getZoneMonsterCount", LuaScriptInterface::luaGameZoneGetMonsterCount);
+	registerMethod("Game", "getZoneTileCount", LuaScriptInterface::luaGameZoneGetTileCount);
+	// Zone System Vectors:
+	registerMethod("Game", "getZoneCreaturesVector", LuaScriptInterface::luaGameZoneGetCreaturesVector);
+	registerMethod("Game", "getZonePlayersVector", LuaScriptInterface::luaGameZoneGetPlayersVector);
+	registerMethod("Game", "getZoneNpcsVector", LuaScriptInterface::luaGameZoneGetNpcsVector);
+	registerMethod("Game", "getZoneMonstersVector", LuaScriptInterface::luaGameZoneGetMonstersVector);
+	registerMethod("Game", "getZonePositionsVector", LuaScriptInterface::luaGameZoneGetPositionsVector);
+	registerMethod("Game", "getZoneTilesVector", LuaScriptInterface::luaGameZoneGetTilesVector);
+
+	registerMethod("Game", "removeByZoneId", LuaScriptInterface::luaGameZoneRemoveByZoneId);
+	registerMethod("Game", "addNewZone", LuaScriptInterface::luaGameZoneAddNewZone);
+
 	// Variant
 	registerClass("Variant", "", LuaScriptInterface::luaVariantCreate);
 
@@ -2113,6 +2131,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Tile", "addItemEx", LuaScriptInterface::luaTileAddItemEx);
 
 	registerMethod("Tile", "getHouse", LuaScriptInterface::luaTileGetHouse);
+	registerMethod("Tile", "getZoneId", LuaScriptInterface::luaTileGetZoneId);
 
 	// NetworkMessage
 	registerClass("NetworkMessage", "", LuaScriptInterface::luaNetworkMessageCreate);
@@ -3014,6 +3033,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("MoveEvent", "id", LuaScriptInterface::luaMoveEventItemId);
 	registerMethod("MoveEvent", "aid", LuaScriptInterface::luaMoveEventActionId);
 	registerMethod("MoveEvent", "uid", LuaScriptInterface::luaMoveEventUniqueId);
+	registerMethod("MoveEvent", "zoneid", LuaScriptInterface::luaMoveEventZoneId);
 	registerMethod("MoveEvent", "position", LuaScriptInterface::luaMoveEventPosition);
 	registerMethod("MoveEvent", "premium", LuaScriptInterface::luaMoveEventPremium);
 	registerMethod("MoveEvent", "vocation", LuaScriptInterface::luaMoveEventVocation);
@@ -4668,6 +4688,191 @@ int LuaScriptInterface::luaGameSaveAccountStorageValues(lua_State* L)
 {
 	// Game.saveAccountStorageValues()
 	lua_pushboolean(L, g_game.saveAccountStorageValues());
+
+	return 1;
+}
+
+// Zone system Counts:
+
+int LuaScriptInterface::luaGameZoneRemoveByZoneId(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	g_game.removeGameZone(zoneId);
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneAddNewZone(lua_State* L)
+{
+	//Game.addNewZone(zoneid, radius, x, y, z)  (tileScale is how big the rectangle of tiles will be covered in zoneid)
+	//Tile* tile = getUserdata<Tile>(L, 2);
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	uint16_t radius = static_cast<uint16_t>(luaL_checkinteger(L, 2));
+	uint16_t x = static_cast<uint16_t>(luaL_checkinteger(L, 3));
+	uint16_t y = static_cast<uint16_t>(luaL_checkinteger(L, 4));
+	uint8_t z = static_cast<uint8_t>(luaL_checkinteger(L, 5));
+	std::vector<uint16_t> zoneIds = { zoneId };
+
+	for (int16_t dx = -radius; dx <= radius; ++dx) {
+		for (int16_t dy = -radius; dy <= radius; ++dy) {
+			Tile* tile = g_game.map.getTile(x + dx, y + dy, z);
+			if (tile) {
+				g_game.addGameZone(tile, zoneIds);
+			}
+		}
+	}
+
+	return 1;
+}
+
+
+
+int LuaScriptInterface::luaGameZoneGetCreatureCount(lua_State* L)
+{
+	// Ensure there are two arguments: zoneId and dataType
+	if (lua_gettop(L) != 2) {
+		return luaL_error(L, "Usage: getCreatureCountZone(zoneId, dataType)");
+	}
+
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	CreatureType_t dataType = static_cast<CreatureType_t>(luaL_checkinteger(L, 2));
+	int creatureCount = g_game.getCreatureCount(zoneId, dataType);
+
+	lua_pushinteger(L, creatureCount);
+
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetPlayerCount(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	int count = g_game.getPlayerCount(zoneId);
+	lua_pushinteger(L, count);
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetNpcCount(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	int count = g_game.getNpcCount(zoneId);
+	lua_pushinteger(L, count);
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetMonsterCount(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	int count = g_game.getMonsterCount(zoneId);
+	lua_pushinteger(L, count);
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetTileCount(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	int count = g_game.getTileCount(zoneId);
+	lua_pushinteger(L, count);
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetCreaturesVector(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	CreatureType_t dataType = static_cast<CreatureType_t>(luaL_checkinteger(L, 2));
+	std::vector<Creature*> creatures = g_game.getCreaturesInZone(zoneId, dataType);
+
+	lua_createtable(L, creatures.size(), 0);
+
+	int index = 0;
+	for (Creature* creature : creatures) {
+		pushUserdata<Creature>(L, creature);
+		setCreatureMetatable(L, -1, creature);
+		lua_rawseti(L, -2, ++index);
+	}
+
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetMonstersVector(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	std::vector<Creature*> monsters = g_game.getMonstersInZone(zoneId);
+
+	lua_createtable(L, monsters.size(), 0);
+
+	int index = 0;
+	for (Creature* monster : monsters) {
+		pushUserdata<Creature>(L, monster);
+		setCreatureMetatable(L, -1, monster);
+		lua_rawseti(L, -2, ++index);
+	}
+
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetPlayersVector(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	std::vector<Creature*> players = g_game.getPlayersInZone(zoneId);
+
+	lua_createtable(L, players.size(), 0);
+
+	int index = 0;
+	for (Creature* player : players) {
+		pushUserdata<Creature>(L, player);
+		setCreatureMetatable(L, -1, player);
+		lua_rawseti(L, -2, ++index);
+	}
+
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetNpcsVector(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	std::vector<Creature*> npcs = g_game.getNpcsInZone(zoneId);
+
+	lua_createtable(L, npcs.size(), 0);
+
+	int index = 0;
+	for (Creature* npc : npcs) {
+		pushUserdata<Creature>(L, npc);
+		setCreatureMetatable(L, -1, npc);
+		lua_rawseti(L, -2, ++index);
+	}
+
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetPositionsVector(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	std::vector<Position> positions = g_game.getPositionsInZone(zoneId);
+
+	lua_createtable(L, positions.size(), 0);
+
+	int index = 0;
+	for (Position& position : positions) {
+		pushUserdata<Position>(L, &position);
+		setMetatable(L, -1, "Tile");
+		lua_rawseti(L, -2, ++index);
+	}
+
+	return 1;
+}
+
+int LuaScriptInterface::luaGameZoneGetTilesVector(lua_State* L)
+{
+	uint16_t zoneId = static_cast<uint16_t>(luaL_checkinteger(L, 1));
+	std::vector<Tile*> tiles = g_game.getTilesInZone(zoneId);
+
+	lua_createtable(L, tiles.size(), 0);
+
+	int index = 0;
+	for (Tile* tile : tiles) {
+		pushUserdata<Tile>(L, tile);
+		setMetatable(L, -1, "Tile");
+		lua_rawseti(L, -2, ++index);
+	}
 
 	return 1;
 }
@@ -16068,6 +16273,26 @@ int LuaScriptInterface::luaMoveEventRegister(lua_State* L)
 	return 1;
 }
 
+int LuaScriptInterface::luaTileGetZoneId(lua_State* L)
+{
+	// tile:getZoneId()
+	Tile* tile = getUserdata<Tile>(L, 1);
+	if (tile) {
+		const std::vector<uint16_t>& zoneIds = tile->getZoneIds();
+		lua_createtable(L, zoneIds.size(), 0);
+
+		int index = 1;
+		for (const auto& zoneId : zoneIds) {
+			lua_pushnumber(L, zoneId);
+			lua_rawseti(L, -2, index++);
+		}
+	}
+	else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
 int LuaScriptInterface::luaMoveEventOnCallback(lua_State* L)
 {
 	// moveevent:onEquip / deEquip / etc. (callback)
@@ -16278,6 +16503,28 @@ int LuaScriptInterface::luaMoveEventUniqueId(lua_State* L)
 		}
 		pushBoolean(L, true);
 	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaMoveEventZoneId(lua_State* L)
+{
+	// moveevent:zoneid(ids)
+	MoveEvent* moveevent = getUserdata<MoveEvent>(L, 1);
+	if (moveevent) {
+		int parameters = lua_gettop(L) - 1; // - 1 because self is a parameter aswell, which we want to skip ofc
+		if (parameters > 1) {
+			for (int i = 0; i < parameters; ++i) {
+				moveevent->addZoneId(getNumber<uint32_t>(L, 2 + i));
+			}
+		}
+		else {
+			moveevent->addZoneId(getNumber<uint32_t>(L, 2));
+		}
+		pushBoolean(L, true);
+	}
+	else {
 		lua_pushnil(L);
 	}
 	return 1;

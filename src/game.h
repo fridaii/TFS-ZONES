@@ -57,6 +57,9 @@ static constexpr int32_t EVENT_DECAY_BUCKETS = 4;
   * This class is responsible to control everything that happens
   */
 
+class Zones;
+typedef std::shared_ptr<Zones> ZonesPtr;
+
 class Game
 {
 	public:
@@ -510,6 +513,27 @@ class Game
 			tilesToClean.clear();
 		}
 
+		uint32_t getZoneCount() const { return m_gameZones.size(); }
+		ZonesPtr getZoneById(uint16_t zoneId);
+		void addGameZone(Tile* tile, const std::vector<uint16_t>& zoneIds);
+
+		void removeGameZone(uint16_t zoneId);
+
+		int getCreatureCount(uint16_t zoneId, CreatureType_t dataType);
+		int getCreatureCount(uint16_t zoneId);
+		int getTileCount(uint16_t zoneId);
+		int getPlayerCount(uint16_t zoneId);
+		int getNpcCount(uint16_t zoneId);
+		int getMonsterCount(uint16_t zoneId);
+
+		std::vector<Creature*> getPlayersInZone(uint16_t zoneId);
+		std::vector<Creature*> getNpcsInZone(uint16_t zoneId);
+		std::vector<Creature*> getMonstersInZone(uint16_t zoneId);
+		std::vector<Position> getPositionsInZone(uint16_t zoneId) const;
+		std::vector<Tile*> getTilesInZone(uint16_t zoneId) const;
+		std::vector<Creature*> getCreaturesInZone(uint16_t zoneId);
+		std::vector<Creature*> getCreaturesInZone(uint16_t zoneId, CreatureType_t dataType);
+
 	private:
 		bool playerSaySpell(Player* player, SpeakClasses type, const std::string& text);
 		void playerWhisper(Player* player, const std::string& text);
@@ -520,6 +544,7 @@ class Game
 		void checkDecay();
 		void internalDecayItem(Item* item);
 
+		std::unordered_map<uint16_t, ZonesPtr> m_gameZones;
 		std::unordered_map<uint32_t, Player*> players;
 		std::unordered_map<std::string, Player*> mappedPlayerNames;
 		std::unordered_map<uint32_t, Player*> mappedPlayerGuids;

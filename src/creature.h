@@ -462,6 +462,8 @@ class Creature : virtual public Thing
 			}
 		}
 
+		const std::vector<uint16_t>& getZoneIds() const;
+
 	protected:
 		virtual bool useCacheMap() const {
 			return false;

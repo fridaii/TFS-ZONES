@@ -25,6 +25,7 @@
 #include "talkaction.h"
 #include "weapons.h"
 #include "script.h"
+#include "zones.h"
 
 #include <fmt/format.h>
 
@@ -5787,4 +5788,190 @@ bool Game::reload(ReloadTypes_t reloadType)
 		}
 	}
 	return true;
+}
+
+
+void Game::addGameZone(Tile* tile, const std::vector<uint16_t>& zoneIds)
+{
+
+	for (auto& zoneId : zoneIds)
+	{
+		tile->setTrueZoneId(zoneId);
+		auto itZone = m_gameZones.find(zoneId);
+		if (itZone == m_gameZones.end())
+		{
+			m_gameZones.emplace(zoneId, std::make_shared<Zones>(tile));
+		}
+		else
+		{
+			itZone->second->addTile(tile);
+		}
+	}
+}
+
+ZonesPtr Game::getZoneById(uint16_t zoneId)
+{
+	auto itZone = m_gameZones.find(zoneId);
+	if (itZone != m_gameZones.end())
+	{
+		return itZone->second;
+	}
+
+	return nullptr;
+}
+
+
+/**/
+void Game::removeGameZone(uint16_t zoneId)
+{
+	auto itZone = m_gameZones.find(zoneId);
+	if (itZone != m_gameZones.end())
+	{
+		m_gameZones.erase(itZone);
+	}
+}
+
+
+int Game::getPlayerCount(uint16_t zoneId) {
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return 0;
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getPlayerCount();
+}
+
+int Game::getNpcCount(uint16_t zoneId) {
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return 0;
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getNpcCount();
+}
+
+int Game::getCreatureCount(uint16_t zoneId)
+{
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return 0;
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getCreatureCount();
+}
+
+int Game::getCreatureCount(uint16_t zoneId, CreatureType_t dataType)
+{
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return 0;
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getCreatureCount(dataType);
+}
+
+int Game::getTileCount(uint16_t zoneId)
+{
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return 0;
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getTilesCount();
+}
+
+int Game::getMonsterCount(uint16_t zoneId)
+{
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return 0;
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getMonsterCount();
+}
+
+
+//Zone Vectors
+std::vector<Creature*> Game::getPlayersInZone(uint16_t zoneId) {
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return std::vector<Creature*>();
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getPlayers();
+}
+
+std::vector<Creature*> Game::getNpcsInZone(uint16_t zoneId) {
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return std::vector<Creature*>();
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getNpcs();
+}
+
+std::vector<Creature*> Game::getMonstersInZone(uint16_t zoneId)
+{
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return std::vector<Creature*>();
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getMonsters();
+}
+
+std::vector<Position> Game::getPositionsInZone(uint16_t zoneId) const {
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return std::vector<Position>();
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getPositions();
+}
+
+
+std::vector<Tile*> Game::getTilesInZone(uint16_t zoneId) const
+{
+	std::vector<Tile*> tiles;
+
+	// Find the zone data by zone ID
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		// Zone not found
+		return tiles;
+	}
+
+	// Get the tiles in the zone
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getTiles();
+}
+
+std::vector<Creature*> Game::getCreaturesInZone(uint16_t zoneId) {
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return std::vector<Creature*>();
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getCreatures();
+}
+
+std::vector<Creature*> Game::getCreaturesInZone(uint16_t zoneId, CreatureType_t dataType) {
+	auto it = m_gameZones.find(zoneId);
+	if (it == m_gameZones.end()) {
+		return std::vector<Creature*>();
+	}
+
+	const ZonesPtr& zonesPtr = it->second;
+	return zonesPtr->getCreatures(dataType);
 }

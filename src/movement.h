@@ -30,6 +30,7 @@ using MoveEvent_ptr = std::unique_ptr<MoveEvent>;
 
 struct MoveEventList {
 	std::list<MoveEvent> moveEvent[MOVE_EVENT_LAST];
+	uint32_t zoneId;
 };
 
 using VocEquipMap = std::map<uint16_t, bool>;
@@ -49,7 +50,7 @@ class MoveEvents final : public BaseEvents
 		ReturnValue onPlayerDeEquip(Player* player, Item* item, slots_t slot);
 		uint32_t onItemMove(Item* item, Tile* tile, bool isAdd);
 
-		MoveEvent* getEvent(Item* item, MoveEvent_t eventType);
+		MoveEvent* getEvent(const Tile* tile, Item* item, MoveEvent_t eventType);
 
 		bool registerLuaEvent(MoveEvent* event);
 		bool registerLuaFunction(MoveEvent* event);
@@ -70,12 +71,14 @@ class MoveEvents final : public BaseEvents
 
 		void addEvent(MoveEvent moveEvent, const Position& pos, MovePosListMap& map);
 		MoveEvent* getEvent(const Tile* tile, MoveEvent_t eventType);
+		std::vector<MoveEventList*> getEvents(const Tile* tile, Item* item, MoveEvent_t eventType);
 
 		MoveEvent* getEvent(Item* item, MoveEvent_t eventType, slots_t slot);
 
 		MoveListMap uniqueIdMap;
 		MoveListMap actionIdMap;
 		MoveListMap itemIdMap;
+		MoveListMap zoneIdMap;
 		MovePosListMap positionMap;
 
 		LuaScriptInterface scriptInterface;
@@ -96,7 +99,7 @@ class MoveEvent final : public Event
 		bool configureEvent(const pugi::xml_node& node) override;
 		bool loadFunction(const pugi::xml_attribute& attr, bool isScripted) override;
 
-		uint32_t fireStepEvent(Creature* creature, Item* item, const Position& pos);
+		uint32_t fireStepEvent(Creature* creature, Item* item, const Position& pos, const uint16_t zoneid);
 		uint32_t fireAddRemItem(Item* item, Item* tileItem, const Position& pos);
 		ReturnValue fireEquip(Player* player, Item* item, slots_t slot, bool isCheck);
 
@@ -105,7 +108,7 @@ class MoveEvent final : public Event
 		}
 
 		//scripting
-		bool executeStep(Creature* creature, Item* item, const Position& pos);
+		bool executeStep(Creature* creature, Item* item, const Position& pos, const uint16_t zoneid);
 		bool executeEquip(Player* player, Item* item, slots_t slot, bool isCheck);
 		bool executeAddRemItem(Item* item, Item* tileItem, const Position& pos);
 		//
@@ -161,6 +164,15 @@ class MoveEvent final : public Event
 		}
 		void addActionId(uint32_t id) {
 			actionIdRange.emplace_back(id);
+		}
+		const std::vector<uint32_t>& getZoneIdRange() const {
+			return zoneIdRange;
+		}
+		void addZoneId(uint32_t id) {
+			zoneIdRange.emplace_back(id);
+		}
+		void clearZoneIdRange() {
+			return zoneIdRange.clear();
 		}
 		void clearUniqueIdRange() {
 			return uniqueIdRange.clear();
@@ -240,6 +252,7 @@ class MoveEvent final : public Event
 		std::vector<uint32_t> actionIdRange;
 		std::vector<uint32_t> uniqueIdRange;
 		std::vector<Position> posList;
+		std::vector <uint32_t> zoneIdRange;
 };
 
 #endif

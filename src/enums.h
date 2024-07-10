@@ -119,6 +119,7 @@ enum CreatureType_t : uint8_t {
 	CREATURETYPE_NPC = 2,
 	CREATURETYPE_SUMMON_OWN = 3,
 	CREATURETYPE_SUMMON_OTHERS = 4,
+	CREATURETYPE_ANY = 5,
 };
 
 enum OperatingSystem_t : uint8_t {
@@ -369,7 +370,9 @@ enum PlayerSex_t : uint8_t {
 	PLAYERSEX_LAST = PLAYERSEX_MALE
 };
 
-inline constexpr uint16_t VOCATION_NONE = 0;
+enum Vocation_t : uint16_t {
+	VOCATION_NONE = 0
+};
 
 enum ReturnValue {
 	RETURNVALUE_NOERROR,
