@@ -50,7 +50,7 @@ class MoveEvents final : public BaseEvents
 		ReturnValue onPlayerDeEquip(Player* player, Item* item, slots_t slot);
 		uint32_t onItemMove(Item* item, Tile* tile, bool isAdd);
 
-		MoveEvent* getEvent(const Tile* tile, Item* item, MoveEvent_t eventType);
+		MoveEvent* getEvent(Item* item, MoveEvent_t eventType);
 
 		bool registerLuaEvent(MoveEvent* event);
 		bool registerLuaFunction(MoveEvent* event);
@@ -71,7 +71,7 @@ class MoveEvents final : public BaseEvents
 
 		void addEvent(MoveEvent moveEvent, const Position& pos, MovePosListMap& map);
 		MoveEvent* getEvent(const Tile* tile, MoveEvent_t eventType);
-		std::vector<MoveEventList*> getEvents(const Tile* tile, MoveEvent_t eventType);
+		std::vector<MoveEventList*> getEvents(const Tile* tile);
 
 		MoveEvent* getEvent(Item* item, MoveEvent_t eventType, slots_t slot);
 
