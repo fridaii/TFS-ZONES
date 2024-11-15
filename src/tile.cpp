@@ -1604,6 +1604,10 @@ Item* Tile::getUseItem(int32_t index) const
 
 void Tile::setTrueZoneId(uint16_t zoneId)
 {
+	if (hasZoneId(zoneId))
+	{
+		return;
+	}
 	m_zoneIds.push_back(zoneId); //allows for adding zones from lua, originally adding was possible only via loading from map editor
 }
 

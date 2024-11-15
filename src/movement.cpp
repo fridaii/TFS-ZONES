@@ -390,7 +390,7 @@ MoveEvent* MoveEvents::getEvent(Item* item, MoveEvent_t eventType, slots_t slot)
 	return nullptr;
 }
 
-MoveEvent* MoveEvents::getEvent(const Tile* tile, Item* item, MoveEvent_t eventType)
+MoveEvent* MoveEvents::getEvent(Item* item, MoveEvent_t eventType)
 {
 	MoveListMap::iterator it;
 
@@ -455,7 +455,7 @@ MoveEvent* MoveEvents::getEvent(const Tile* tile, MoveEvent_t eventType)
 	return nullptr;
 }
 
-std::vector<MoveEventList*> MoveEvents::getEvents(const Tile* tile, MoveEvent_t eventType)
+std::vector<MoveEventList*> MoveEvents::getEvents(const Tile* tile)
 {
 	std::vector<MoveEventList*> eventLists;
 
@@ -481,10 +481,10 @@ uint32_t MoveEvents::onCreatureMove(Creature* creature, const Tile* tile, MoveEv
 
 	const auto& zoneIds = tile->getZoneIds();
 	if (!zoneIds.empty()) {
-		std::vector<MoveEventList*> moveEventsLists = getEvents(tile, eventType);
+		std::vector<MoveEventList*> moveEventsLists = getEvents(tile);
 		for (auto moveEventList : moveEventsLists) {
 			if (moveEventList) {
-				uint32_t zoneId = moveEventList->zoneId;
+				uint16_t zoneId = moveEventList->zoneId;
 				for (MoveEvent& moveEvent : moveEventList->moveEvent[eventType]) {
 					ret &= moveEvent.fireStepEvent(creature, nullptr, pos, zoneId);
 				}
@@ -503,7 +503,7 @@ uint32_t MoveEvents::onCreatureMove(Creature* creature, const Tile* tile, MoveEv
 			continue;
 		}
 
-		moveEvent = getEvent(tile, tileItem, eventType);
+		moveEvent = getEvent(tileItem, eventType);
 		if (moveEvent) {
 			ret &= moveEvent->fireStepEvent(creature, tileItem, pos, 0);
 		}
@@ -547,7 +547,7 @@ uint32_t MoveEvents::onItemMove(Item* item, Tile* tile, bool isAdd)
 		ret &= moveEvent->fireAddRemItem(item, nullptr, tile->getPosition());
 	}
 
-	moveEvent = getEvent(tile, item, eventType1);
+	moveEvent = getEvent(item, eventType1);
 	if (moveEvent) {
 		ret &= moveEvent->fireAddRemItem(item, nullptr, tile->getPosition());
 	}
@@ -563,7 +563,7 @@ uint32_t MoveEvents::onItemMove(Item* item, Tile* tile, bool isAdd)
 			continue;
 		}
 
-		moveEvent = getEvent(tile, tileItem, eventType2);
+		moveEvent = getEvent(tileItem, eventType2);
 		if (moveEvent) {
 			ret &= moveEvent->fireAddRemItem(item, tileItem, tile->getPosition());
 		}
