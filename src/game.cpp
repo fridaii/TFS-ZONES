@@ -5796,7 +5796,6 @@ void Game::addGameZone(Tile* tile, const std::vector<uint16_t>& zoneIds)
 
 	for (auto& zoneId : zoneIds)
 	{
-		tile->setTrueZoneId(zoneId);
 		auto itZone = m_gameZones.find(zoneId);
 		if (itZone == m_gameZones.end())
 		{
